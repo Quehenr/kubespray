@@ -6,26 +6,26 @@ all:
       access_ip: 172.16.0.11
       ansible_ssh_user: vagrant
       ansible_ssh_private_key_file: '/Users/younggyu.lee/quehenr/private/unstable-laboratory/.vagrant/machines/master-1/virtualbox/private_key'
-    work-1:
+    worker-1:
       ansible_host: 172.16.0.21
       ip: 172.16.0.21
       access_ip: 172.16.0.21
       ansible_ssh_user: vagrant
-      ansible_ssh_private_key_file: '/Users/younggyu.lee/quehenr/private/unstable-laboratory/.vagrant/machines/work-1/virtualbox/private_key'
-    work-2:
+      ansible_ssh_private_key_file: '/Users/younggyu.lee/quehenr/private/unstable-laboratory/.vagrant/machines/worker-1/virtualbox/private_key'
+    worker-2:
       ansible_host: 172.16.0.22
       ip: 172.16.0.22
       access_ip: 172.16.0.22
       ansible_ssh_user: vagrant
-      ansible_ssh_private_key_file: '/Users/younggyu.lee/quehenr/private/unstable-laboratory/.vagrant/machines/work-2/virtualbox/private_key'
+      ansible_ssh_private_key_file: '/Users/younggyu.lee/quehenr/private/unstable-laboratory/.vagrant/machines/worker-2/virtualbox/private_key'
   children:
     kube_control_plane:
       hosts:
         master-1:
     kube_node:
       hosts:
-        work-1:
-        work-2:
+        worker-1:
+        worker-2:
     etcd:
       hosts:
         master-1:
