@@ -3,7 +3,7 @@
 ## Generic Ansible variables
 
 You can view facts gathered by Ansible automatically
-[here](https://docs.ansible.com/ansible/latest/playbooks_variables.html#information-discovered-from-systems-facts).
+[here](https://docs.ansible.com/ansible/latest/user_guide/playbooks_vars_facts.html#ansible-facts).
 
 Some variables of note include:
 
@@ -26,7 +26,7 @@ Some variables of note include:
 * *kube_version* - Specify a given Kubernetes version
 * *searchdomains* - Array of DNS domains to search when looking up hostnames
 * *nameservers* - Array of nameservers to use for DNS lookup
-* *preinstall_selinux_state* - Set selinux state, permitted values are permissive and disabled.
+* *preinstall_selinux_state* - Set selinux state, permitted values are permissive, enforcing and disabled.
 
 ## Addressing variables
 
