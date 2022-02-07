@@ -100,7 +100,6 @@ The following tags are defined in playbooks:
 
 |                       Tag name | Used for
 |--------------------------------|---------
-|                     ambassador | Ambassador Ingress Controller
 |                       annotate | Create kube-router annotation
 |                           apps | K8s apps definitions
 |                        asserts | Check tasks for download role
@@ -180,7 +179,6 @@ The following tags are defined in playbooks:
 |                   node-webhook | Tasks linked to webhook (grating access to resources)
 |                     nvidia_gpu | Enable nvidia accelerator for runtimes
 |                            oci | Cloud provider: oci
-|                        ovn4nfv | Network plugin ovn4nfv
 |             persistent_volumes | Configure csi volumes
 | persistent_volumes_aws_ebs_csi | Configuring csi driver: aws-ebs
 | persistent_volumes_cinder_csi  | Configuring csi driver: cinder
@@ -204,6 +202,7 @@ The following tags are defined in playbooks:
 |             vsphere-csi-driver | Configuring csi driver: vsphere
 |                          weave | Network plugin Weave
 |                      win_nodes | Running windows specific tasks
+|                          youki | Configuring youki runtime
 
 Note: Use the ``bash scripts/gen_tags.sh`` command to generate a list of all
 tags found in the codebase. New tags will be listed with the empty "Used for"
@@ -252,7 +251,7 @@ For more information about Ansible and bastion hosts, read
 
 ## Mitogen
 
-You can use [mitogen](/docs/mitogen.md) to speed up kubespray.
+Mitogen support is deprecated, please see [mitogen related docs](/docs/mitogen.md) for useage and reasons for deprecation.
 
 ## Beyond ansible 2.9
 

@@ -78,7 +78,7 @@ calico_healthhost: "localhost"
 calico_iptables_lock_timeout_secs: 10
 
 # Choose Calico iptables backend: "Legacy", "Auto" or "NFT" (FELIX_IPTABLESBACKEND)
-calico_iptables_backend: "Legacy"
+calico_iptables_backend: "Auto"
 
 # Calico Wireguard support
 calico_wireguard_enabled: false
@@ -123,3 +123,6 @@ calico_bgp_listen_port: 179
 # Calico FelixConfiguration options
 calico_felix_reporting_interval: 0s
 calico_felix_log_severity_screen: Info
+
+# Calico container settings
+calico_allow_ip_forwarding: false

@@ -20,7 +20,8 @@
   template:
     src: "cni-calico.conflist.j2"
     dest: "/etc/cni/net.d/calico.conflist.template"
-    owner: kube
+    mode: 0644
+    owner: root
   register: calico_conflist
   notify: reset_calico_cni
 
@@ -126,6 +127,7 @@
       assemble:
         src: "{{ local_release_dir }}/calico-{{ calico_version }}-kdd-crds"
         dest: "{{ kube_config_dir }}/kdd-crds.yml"
+        mode: 0644
         delimiter: "---\n"
         regexp: ".*\\.yaml"
         remote_src: true
@@ -159,7 +161,8 @@
           "bpfEnabled": {{ calico_bpf_enabled | bool }},
           "bpfExternalServiceMode": "{{ calico_bpf_service_mode }}",
           "wireguardEnabled": {{ calico_wireguard_enabled | bool }},
-          "logSeverityScreen": "{{ calico_felix_log_severity_screen }}" }}
+          "logSeverityScreen": "{{ calico_felix_log_severity_screen }}",
+          "vxlanEnabled": {{ calico_vxlan_mode != 'Never' }} }}
   when:
     - inventory_hostname == groups['kube_control_plane'][0]
 
@@ -329,6 +332,7 @@
   template:
     src: "{{ item.file }}.j2"
     dest: "{{ kube_config_dir }}/{{ item.file }}"
+    mode: 0644
   with_items:
     - {name: calico-config, file: calico-config.yml, type: cm}
     - {name: calico-node, file: calico-node.yml, type: ds}
@@ -345,6 +349,7 @@
   template:
     src: "{{ item.file }}.j2"
     dest: "{{ kube_config_dir }}/{{ item.file }}"
+    mode: 0644
   with_items:
     - {name: calico, file: calico-typha.yml, type: typha}
   register: calico_node_typha_manifest
@@ -417,7 +422,8 @@
       "spec": {
         "asNumber": "{{ item.as }}",
         "node": "{{ inventory_hostname }}",
-        "peerIP": "{{ item.router_id }}"
+        "peerIP": "{{ item.router_id }}",
+        "sourceAddress": "{{ item.sourceaddress|default('UseNodeIP') }}"
       }}
   register: output
   retries: 4
