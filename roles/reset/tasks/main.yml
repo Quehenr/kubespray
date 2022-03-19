@@ -4,7 +4,9 @@
     name: "{{ item }}"
     state: stopped
   with_items:
-    - kubelet
+    - kubelet.service
+    - cri-dockerd.service
+    - cri-dockerd.socket
   failed_when: false
   tags:
     - services
@@ -15,6 +17,8 @@
     state: absent
   with_items:
     - kubelet.service
+    - cri-dockerd.service
+    - cri-dockerd.socket
     - calico-node.service
     - containerd.service.d/http-proxy.conf
     - crio.service.d/http-proxy.conf
@@ -101,6 +105,7 @@
     - crictl.stat.exists
     - container_manager in ["crio", "containerd"]
     - deploy_container_engine
+  ignore_errors: true  # noqa ignore-errors
 
 - name: reset | stop and disable crio service
   service:
@@ -146,6 +151,8 @@
   rescue:
     - name: reset | force remove all cri pods (rescue)
       shell: "ip netns list | cut -d' ' -f 1 | xargs -n1 ip netns delete && {{ bin_dir }}/crictl rmp -a -f"
+      ignore_errors: true  # noqa ignore-errors
+      changed_when: true
 
 - name: reset | stop etcd services
   service:
@@ -296,6 +303,7 @@
     - /etc/pki/ca-trust/source/anchors/kube-ca.crt
     - /var/log/pods/
     - "{{ bin_dir }}/kubelet"
+    - "{{ bin_dir }}/cri-dockerd"
     - "{{ bin_dir }}/etcd-scripts"
     - "{{ bin_dir }}/etcd"
     - "{{ bin_dir }}/etcd-events"
@@ -333,6 +341,7 @@
     - /etc/origin/openvswitch
     - /etc/origin/ovn
     - "{{ sysctl_file_path }}"
+    - /etc/crictl.yaml
   ignore_errors: true  # noqa ignore-errors
   tags:
     - files

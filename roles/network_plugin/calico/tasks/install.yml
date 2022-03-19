@@ -194,7 +194,7 @@
     - inventory_hostname == groups['kube_control_plane'][0]
     - 'calico_conf.stdout == "0"'
 
-- name: Calico | Configure calico ipv6 network pool (version >= v3.3.0)
+- name: Calico | Configure calico ipv6 network pool
   command:
     cmd: "{{ bin_dir }}/calicoctl.sh apply -f -"
     stdin: >
@@ -440,4 +440,15 @@
     - "{{ peers|selectattr('scope','undefined')|list|default([]) | union(peers|selectattr('scope','defined')|selectattr('scope','equalto', 'node')|list|default([])) }}"
   when:
     - peer_with_router|default(false)
+    - inventory_hostname in groups['k8s_cluster']
+
+- name: Calico | Configure ipam strictaffinity
+  command:
+    cmd: "{{ bin_dir }}/calicoctl.sh ipam configure --strictaffinity={{ calico_ipam_strictaffinity }}"
+  register: output
+  retries: 4
+  until: output.rc == 0
+  delay: "{{ retry_stagger | random + 3 }}"
+  when:
+    - calico_ipam_strictaffinity is defined
     - inventory_hostname in groups['k8s_cluster']

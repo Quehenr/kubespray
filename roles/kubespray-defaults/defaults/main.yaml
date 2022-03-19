@@ -15,7 +15,7 @@ is_fedora_coreos: false
 disable_swap: true
 
 ## Change this to use another Kubernetes version, e.g. a current beta release
-kube_version: v1.23.3
+kube_version: v1.23.5
 
 ## The minimum version working
 kube_version_min_required: v1.21.0
@@ -132,7 +132,7 @@ enable_coredns_k8s_endpoint_pod_names: false
 # Kubernetes configuration dirs and system namespace.
 # Those are where all the additional config stuff goes
 # the kubernetes normally puts in /srv/kubernetes.
-# This puts them in a same location and namespace.
+# This puts them in a sane location and namespace.
 # Editing those values will almost surely break something.
 kube_config_dir: /etc/kubernetes
 kube_script_dir: "{{ bin_dir }}/kubernetes-scripts"
@@ -258,10 +258,13 @@ kubelet_shutdown_grace_period: 60s
 kubelet_shutdown_grace_period_critical_pods: 20s
 
 # Whether to deploy the container engine
-deploy_container_engine: "{{ inventory_hostname in groups['k8s_cluster'] or etcd_deployment_type != 'host' }}"
+deploy_container_engine: "{{ inventory_hostname in groups['k8s_cluster'] or etcd_deployment_type == 'docker' }}"
 
 # Container for runtime
 container_manager: containerd
+
+# Enable CRI Docker interface
+cri_dockerd_enabled: false
 
 # Enable Kata Containers as additional container runtime
 # When enabled, it requires `container_manager` different than Docker
@@ -288,6 +291,8 @@ cri_socket: >-
   /var/run/crio/crio.sock
   {%- elif container_manager == 'containerd' -%}
   /var/run/containerd/containerd.sock
+  {%- elif cri_dockerd_enabled -%}
+  /var/run/cri-dockerd.sock
   {%- else -%}
   /var/run/dockershim.sock
   {%- endif -%}
@@ -343,9 +348,6 @@ docker_registry_mirrors: []
 ## A list of plugins to install using 'docker plugin install --grant-all-permissions'
 ## Empty by default so no plugins will be installed.
 docker_plugins: []
-
-# Experimental kubeadm etcd deployment mode. Available only for new deployment
-etcd_kubeadm_enabled: false
 
 # Containerd options - thse are relevant when container_manager == 'containerd'
 containerd_use_systemd_cgroup: true
