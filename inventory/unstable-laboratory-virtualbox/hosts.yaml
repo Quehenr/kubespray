@@ -1,17 +1,29 @@
 all:
   hosts:
     master-1:
-      ansible_host: 172.16.0.11
-      ip: 172.16.0.11
-      access_ip: 172.16.0.11
+      ansible_host: 192.168.56.101
+      ip: 192.168.56.101
+      access_ip: 192.168.56.101
       ansible_ssh_user: vagrant
       ansible_ssh_private_key_file: '../vagrant/.vagrant/machines/master-1/virtualbox/private_key'
     worker-1:
-      ansible_host: 172.16.0.21
-      ip: 172.16.0.21
-      access_ip: 172.16.0.21
+      ansible_host: 192.168.56.102
+      ip: 192.168.56.102
+      access_ip: 192.168.56.102
       ansible_ssh_user: vagrant
       ansible_ssh_private_key_file: '../vagrant/.vagrant/machines/worker-1/virtualbox/private_key'
+    worker-2:
+      ansible_host: 192.168.56.103
+      ip: 192.168.56.103
+      access_ip: 192.168.56.103
+      ansible_ssh_user: vagrant
+      ansible_ssh_private_key_file: '../vagrant/.vagrant/machines/worker-2/virtualbox/private_key'
+    worker-3:
+      ansible_host: 192.168.56.104
+      ip: 192.168.56.104
+      access_ip: 192.168.56.104
+      ansible_ssh_user: vagrant
+      ansible_ssh_private_key_file: '../vagrant/.vagrant/machines/worker-3/virtualbox/private_key'
   children:
     kube_control_plane:
       hosts:
@@ -19,6 +31,8 @@ all:
     kube_node:
       hosts:
         worker-1:
+        worker-2:
+        worker-3:
     etcd:
       hosts:
         master-1:
