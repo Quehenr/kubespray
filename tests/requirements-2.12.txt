@@ -1,4 +1,4 @@
--r ../requirements-2.10.txt
+-r ../requirements-2.12.txt
 yamllint==1.19.0
 apache-libcloud==2.2.1
 tox==3.11.1
