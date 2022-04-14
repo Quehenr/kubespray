@@ -49,7 +49,7 @@ download_delegate: "{% if download_localhost %}localhost{% else %}{{ groups['kub
 docker_image_pull_command: "{{ docker_bin_dir }}/docker pull"
 docker_image_info_command: "{{ docker_bin_dir }}/docker images -q | xargs -i {{ '{{' }} docker_bin_dir }}/docker inspect -f {% raw %}'{{ '{{' }} if .RepoTags }}{{ '{{' }} join .RepoTags \",\" }}{{ '{{' }} end }}{{ '{{' }} if .RepoDigests }},{{ '{{' }} join .RepoDigests \",\" }}{{ '{{' }} end }}' {% endraw %} {} | tr '\n' ','"
 nerdctl_image_info_command: "{{ bin_dir }}/nerdctl -n k8s.io images --format '{% raw %}{{ '{{' }} .Repository {{ '}}' }}:{{ '{{' }} .Tag {{ '}}' }}{% endraw %}' 2>/dev/null | grep -v ^:$ | tr '\n' ','"
-nerdctl_image_pull_command: "{{ bin_dir }}/nerdctl -n k8s.io pull --quiet{{ nerdctl_extra_flags }}"
+nerdctl_image_pull_command: "{{ bin_dir }}/nerdctl -n k8s.io pull --quiet {{ nerdctl_extra_flags }}"
 crictl_image_info_command: "{{ bin_dir }}/crictl images --verbose | awk -F ': ' '/RepoTags|RepoDigests/ {print $2}' | tr '\n' ','"
 crictl_image_pull_command: "{{ bin_dir }}/crictl pull"
 
@@ -65,16 +65,16 @@ image_info_command_on_localhost: "{{ lookup('vars', image_command_tool_on_localh
 image_arch: "{{host_architecture | default('amd64')}}"
 
 # Nerdctl insecure flag set
-nerdctl_extra_flags: '{%- if containerd_insecure_registries is defined and containerd_insecure_registries|length>0 -%}\" --insecure-registry\"{%- else -%}{%- endif -%}'
+nerdctl_extra_flags: '{%- if containerd_insecure_registries is defined and containerd_insecure_registries|length>0 -%}--insecure-registry{%- else -%}{%- endif -%}'
 
 # Versions
 kubeadm_version: "{{ kube_version }}"
-crun_version: 1.4.3
-runc_version: v1.1.0
+crun_version: 1.4.4
+runc_version: v1.1.1
 kata_containers_version: 2.2.3
 youki_version: 0.0.1
 gvisor_version: 20210921
-containerd_version: 1.6.1
+containerd_version: 1.6.2
 cri_dockerd_version: v0.2.0
 
 # this is relevant when container_manager == 'docker'
@@ -101,7 +101,9 @@ calico_cni_version: "{{ calico_version }}"
 calico_flexvol_version: "{{ calico_version }}"
 calico_policy_version: "{{ calico_version }}"
 calico_typha_version: "{{ calico_version }}"
+calico_apiserver_version: "{{ calico_version }}"
 typha_enabled: false
+calico_apiserver_enabled: false
 
 flannel_version: "v0.15.1"
 flannel_cni_version: "v1.0.0"
@@ -113,7 +115,7 @@ kube_ovn_version: "v1.8.1"
 kube_router_version: "v1.4.0"
 multus_version: "v3.8"
 helm_version: "v3.8.0"
-nerdctl_version: "0.17.1"
+nerdctl_version: "0.18.0"
 krew_version: "v0.4.2"
 
 # Get kubernetes major version (i.e. 1.17.4 => 1.17)
@@ -631,36 +633,44 @@ runc_checksums:
     v1.0.2: 0
     v1.0.3: 0
     v1.1.0: 0
+    v1.1.1: 0
   arm64:
     v1.0.2: 0
     v1.0.3: 0
     v1.1.0: 9ec8e68feabc4e7083a4cfa45ebe4d529467391e0b03ee7de7ddda5770b05e68
+    v1.1.1: 20c436a736547309371c7ac2a335f5fe5a42b450120e497d09c8dc3902c28444
   amd64:
     v1.0.2: 44d1ba01a286aaf0b31b4be9c6abc20deab0653d44ecb0d93b4d0d20eac3e0b6
     v1.0.3: 5d4c0e5a4e8d6ccbb9c6696bb239f31cfab8d94b15801bafe09aaee600714f61
     v1.1.0: ab1c67fbcbdddbe481e48a55cf0ef9a86b38b166b5079e0010737fd87d7454bb
+    v1.1.1: 5798c85d2c8b6942247ab8d6830ef362924cd72a8e236e77430c3ab1be15f080
   ppc64le:
     v1.0.2: 0
     v1.0.3: 0
     v1.1.0: 4a6b2f43c0f2371b1948b2eceb906fd8b9d8f5e9f6bab7d21bc037f5b300f43e
+    v1.1.1: 5f14bca6e35177134251dfd3c44bccb81136d9043508e7a37494ad9485f5f0e4
 
 crun_checksums:
   arm:
     1.2: 0
     1.3: 0
     1.4.3: 0
+    1.4.4: 0
   amd64:
     1.2: 2228a8e0e0f10920b230f9b8bc7c4fd951b603b278ccf0ebdba794339a49c33b
     1.3: 020a2e74d48f1e52f888a31b8bf873a1a99e9f89713ac9ff9403e14b2b9d5c18
     1.4.3: 6255325b641be6a3cfb33b5bd7790c035337ad18b9c012d0fbe0e4173a2dbd29
+    1.4.4: 73f7f89a98f69c0bf0e9fe1e0129201d5b72529785b4b1bcb4d43c31d0c3a8ea
   arm64:
     1.2: 3aee1057196b40b9786a08c875569c9046e58f97d29333b454359668b6088fb1
     1.3: c0955cf6d3d832c0249bbaa71ed235abb35b8ca45fe07f2bd4501a00afb9bdc4
     1.4.3: f4f328c99f879273ed475f6f7766904948808de0268a48d92e6e0f2038a1989d
+    1.4.4: 2ad2c02ec0b1566f1c5e85223b726b704904cc75c2eb4af298e95b98fe5c166d
   ppc64le:
     1.2: 0
     1.3: 0
     1.4.3: 0
+    1.4.4: 0
 
 youki_checksums:
   arm:
@@ -720,13 +730,13 @@ gvisor_containerd_shim_binary_checksums:
 
 nerdctl_archive_checksums:
   arm:
-    0.17.1: 0fa2da009be79e6d45e34e4c53da194f9c69bb59f3d12c21df80d4ace8461af1
+    0.18.0: a9832ad756d624d1cb39bd55a328956553890b00e081ccccef4da5c34e4b8671
   arm64:
-    0.17.1: 8828b59c95398556d11be4684929fc975c25cb794c31d41d57baf489efb2ad2d
+    0.18.0: 4f73a20d4872da3771a1f7088cae707bf119d35c2e97ea33c9d31b9d167ad956
   amd64:
-    0.17.1: 6d18d3eaa74cd2f8e36e51f551282355d0bb1dd962ecd2d1dfecee161d0bd39a
+    0.18.0: ea44e112d3365c8d86f9189b6fae250767e383dfa7c01a8c05f3de2a7b7c8720
   ppc64le:
-    0.17.1: e34ba71e37855211bbd7d563a2c89d4686f553d1100e59401d95493614b278a7
+    0.18.0: 2a3d61e0d2e121c3b86677f3470f18b8bd7aa12a8b04b91a2faeddd95215c7e0
 
 containerd_archive_checksums:
   arm:
@@ -739,8 +749,10 @@ containerd_archive_checksums:
     1.5.8: 0
     1.5.9: 0
     1.5.10: 0
+    1.5.11: 0
     1.6.0: 0
     1.6.1: 0
+    1.6.2: 0
   arm64:
     1.4.9: 0
     1.4.11: 0
@@ -751,8 +763,10 @@ containerd_archive_checksums:
     1.5.8: 0
     1.5.9: 0
     1.5.10: 0
+    1.5.11: 0
     1.6.0: 6eff3e16d44c89e1e8480a9ca078f79bab82af602818455cc162be344f64686a
     1.6.1: fbeec71f2d37e0e4ceaaac2bdf081295add940a7a5c7a6bcc125e5bbae067791
+    1.6.2: a4b24b3c38a67852daa80f03ec2bc94e31a0f4393477cd7dc1c1a7c2d3eb2a95
   amd64:
     1.4.9: 346f88ad5b973960ff81b5539d4177af5941ec2e4703b479ca9a6081ff1d023b
     1.4.11: 80c47ec5ce2cd91a15204b5f5b534892ca653e75f3fba0c451ca326bca45fb00
@@ -763,8 +777,10 @@ containerd_archive_checksums:
     1.5.8: feeda3f563edf0294e33b6c4b89bd7dbe0ee182ca61a2f9b8c3de2766bcbc99b
     1.5.9: a457793a1643657588baf46d3ffbf44fae0139b65076064e237ddf29cd838ba4
     1.5.10: 44f809e02233a510bb9d136906849e9ed058aa1d3d714244376001ab77464db7
+    1.5.11: f2a2476ca44a24067488cd6d0b064b2128e01f6f53e5f29c5acfaf1520927ee2
     1.6.0: f77725e4f757523bf1472ec3b9e02b09303a5d99529173be0f11a6d39f5676e9
     1.6.1: c1df0a12af2be019ca2d6c157f94e8ce7430484ab29948c9805882df40ec458b
+    1.6.2: 3d94f887de5f284b0d6ee61fa17ba413a7d60b4bb27d756a402b713a53685c6a
   ppc64le:
     1.4.9: 0
     1.4.11: 0
@@ -775,8 +791,10 @@ containerd_archive_checksums:
     1.5.8: 0
     1.5.9: 0
     1.5.10: 0
+    1.5.11: 0
     1.6.0: 0
     1.6.1: 0
+    1.6.2: 0
 
 etcd_binary_checksum: "{{ etcd_binary_checksums[image_arch][etcd_version] }}"
 flannel_cni_binary_checksum: "{{ flannel_cni_binary_checksums[image_arch][flannel_cni_version] }}"
@@ -822,6 +840,8 @@ calico_policy_image_repo: "{{ quay_image_repo }}/calico/kube-controllers"
 calico_policy_image_tag: "{{ calico_policy_version }}{%- if image_arch != 'amd64' -%}-{{ image_arch }}{%- endif -%}"
 calico_typha_image_repo: "{{ quay_image_repo }}/calico/typha"
 calico_typha_image_tag: "{{ calico_typha_version }}{%- if image_arch != 'amd64' -%}-{{ image_arch }}{%- endif -%}"
+calico_apiserver_image_repo: "{{ quay_image_repo }}/calico/apiserver"
+calico_apiserver_image_tag: "{{ calico_apiserver_version }}{%- if image_arch != 'amd64' -%}-{{ image_arch }}{%- endif -%}"
 pod_infra_image_repo: "{{ kube_image_repo }}/pause"
 pod_infra_image_tag: "{{ pod_infra_version }}"
 install_socat_image_repo: "{{ docker_image_repo }}/xueshanf/install-socat"
@@ -859,6 +879,8 @@ kube_router_image_tag: "{{ kube_router_version }}"
 multus_image_repo: "{{ github_image_repo }}/k8snetworkplumbingwg/multus-cni"
 multus_image_tag: "{{ multus_version }}"
 
+kube_vip_image_repo: "{{ github_image_repo }}/kube-vip/kube-vip"
+kube_vip_image_tag: v0.4.2
 nginx_image_repo: "{{ docker_image_repo }}/library/nginx"
 nginx_image_tag: 1.21.4
 haproxy_image_repo: "{{ docker_image_repo }}/library/haproxy"
@@ -898,7 +920,7 @@ ingress_nginx_controller_image_repo: "{{ kube_image_repo }}/ingress-nginx/contro
 ingress_nginx_controller_image_tag: "v1.1.1"
 alb_ingress_image_repo: "{{ docker_image_repo }}/amazon/aws-alb-ingress-controller"
 alb_ingress_image_tag: "v1.1.9"
-cert_manager_version: "v1.7.2"
+cert_manager_version: "v1.8.0"
 cert_manager_controller_image_repo: "{{ quay_image_repo }}/jetstack/cert-manager-controller"
 cert_manager_controller_image_tag: "{{ cert_manager_version }}"
 cert_manager_cainjector_image_repo: "{{ quay_image_repo }}/jetstack/cert-manager-cainjector"
@@ -1295,6 +1317,15 @@ downloads:
     groups:
     - k8s_cluster
 
+  calico_apiserver:
+    enabled: "{{ calico_apiserver_enabled }}"
+    container: true
+    repo: "{{ calico_apiserver_image_repo }}"
+    tag: "{{ calico_apiserver_image_tag }}"
+    sha256: "{{ calico_apiserver_digest_checksum|default(None) }}"
+    groups:
+    - k8s_cluster
+
   calico_crds:
     file: true
     enabled: "{{ kube_network_plugin == 'calico' and calico_datastore == 'kdd' }}"
@@ -1365,6 +1396,15 @@ downloads:
     sha256: "{{ install_socat_digest_checksum|default(None) }}"
     groups:
     - k8s_cluster
+
+  kube-vip:
+    enabled: "{{ kube_vip_enabled }}"
+    container: true
+    repo: "{{ kube_vip_image_repo }}"
+    tag: "{{ kube_vip_image_tag }}"
+    sha256: "{{ kube_vip_digest_checksum|default(None) }}"
+    groups:
+    - kube_control_plane
 
   nginx:
     enabled: "{{ loadbalancer_apiserver_localhost and loadbalancer_apiserver_type == 'nginx' }}"
